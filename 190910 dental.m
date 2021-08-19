@@ -1,16 +1,12 @@
 %% load STL file & make directory
 clc; clear all; close all;
 
-PATH.orig = '\Users\user\MATLAB Drive';
-PATH.slic = '\Users\user\MATLAB Drive\SLICED';
-
-cd(PATH.orig);
 load('STL.mat');
-
 if(isdir("SLICED"))
     rmdir SLICED s;
 end
 mkdir SLICED;
+PATH.slic = strcat(pwd, '\SLICED');
 
 %% scatter sliced 2D image
 COOR1 = FILE1.Points;
@@ -22,6 +18,7 @@ COOR2(:,1) = round(COOR2(:,1)-min(COOR2(:,1)));
 e = max([COOR1(:,1);COOR2(:,1)]); % total number
 n = 100; % partial number
 
+cd(PATH.slic);
 for i = 1:n %e
     image = figure('visible','off');
     
@@ -37,11 +34,26 @@ for i = 1:n %e
     ylim(rang(:,3));
     set(gca,'visible','off');
     
-    cd(PATH.slic);
     filename = string(i)+'.png';
     saveas(image, filename);
 end
 
+%% imshow 3D
+PATH.slic = strcat(pwd, '\SLICED');
+n = 100;
+cd(PATH.slic);
+clear imarray;
+for i = 1:n
+    t = imread(string(i) +'.png');
+    imarray(:,:,i) = t(:,:,1);
+end
+%% 
+clear t; clc;
+M = cast(imarray, 'single');
+figure;
+hs = slice(M(:,:,10:20),[],[],1:10);
+shading interp
+set(hs,'FaceAlpha',0.1);
 %% derivatives within kernel
 for i = 1:1000 %max(length(FILE1.Points),length(FILE2.Points))
     Ksize = 6;
@@ -77,9 +89,9 @@ for i = 1:1000 %max(length(FILE1.Points),length(FILE2.Points))
         DERI2(i,j+1,:) = cross(P0-P1, P0-P2);
     end
     
-    % figure;
-    % scatter3(FILE1.Points(1,1), FILE1.Points(1,2), FILE1.Points(1,3), 'r'); hold on;
-    % scatter3(FILE1.Points(INDEXD,1),FILE1.Points(INDEXD,2),FILE1.Points(INDEXD,3)); hold off;
+%     figure;
+%     scatter3(FILE1.Points(1,1), FILE1.Points(1,2), FILE1.Points(1,3), 'r'); hold on;
+%     scatter3(FILE1.Points(INDEXD,1),FILE1.Points(INDEXD,2),FILE1.Points(INDEXD,3)); hold off;
 end
     
 %% deep learning layers
